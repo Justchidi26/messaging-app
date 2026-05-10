@@ -1,122 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useMemo, useState } from 'react';
+import Sidebar from './components/Sidebar';
+import ChatHeader from './components/ChatHeader';
+import ChatWindow from './components/ChatWindow';
+import MessageInput from './components/MessageInput';
+import { initialConversations } from './data/conversations';
+import type { Conversation, Message } from './types/chat';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [conversations, setConversations] = useState<Conversation[]>(
+    initialConversations
+  );
+
+  const [selectedConversationId, setSelectedConversationId] =
+    useState(1);
+
+  const [message, setMessage] = useState('');
+
+  const selectedConversation = useMemo(
+    () =>
+      conversations.find(
+        (conversation) =>
+          conversation.id === selectedConversationId
+      )!,
+    [conversations, selectedConversationId]
+  );
+
+  const sendMessage = () => {
+    if (!message.trim()) return;
+
+    const newMessage: Message = {
+      id: Date.now(),
+      text: message,
+      sender: 'You',
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      status: 'Sent',
+    };
+
+    setConversations((prev) =>
+      prev.map((conversation) => {
+        if (conversation.id === selectedConversationId) {
+          return {
+            ...conversation,
+            messages: [...conversation.messages, newMessage],
+          };
+        }
+
+        return conversation;
+      })
+    );
+
+    setMessage('');
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="grid h-screen grid-cols-[420px_1fr] bg-[#020817]">
+      <Sidebar
+        conversations={conversations}
+        selectedConversationId={selectedConversationId}
+        setSelectedConversationId={setSelectedConversationId}
+      />
 
-      <div className="ticks"></div>
+      <div className="flex flex-col bg-[#020817]">
+        <ChatHeader conversation={selectedConversation} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <ChatWindow conversation={selectedConversation} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <MessageInput
+          message={message}
+          setMessage={setMessage}
+          sendMessage={sendMessage}
+        />
+      </div>
+    </div>
+  );
 }
-
-export default App
