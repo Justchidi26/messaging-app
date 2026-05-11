@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ConversationItem from "./ConversationItem";
 import type { Conversation } from "../types/chat";
 
@@ -15,9 +15,28 @@ export default function Sidebar({
   selectedConversationId,
   setSelectedConversationId,
 }: Props) {
+  // SHOW / HIDE CARD
+
   const [showNewConversation, setShowNewConversation] = useState(false);
 
+  // NEW CONTACT NAME
+
   const [contactName, setContactName] = useState("");
+
+  // SEARCH
+
+  const [search, setSearch] = useState("");
+
+  // FILTER CONVERSATIONS
+
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((conversation) =>
+      conversation.name
+        .trim()
+        .toLowerCase()
+        .includes(search.trim().toLowerCase()),
+    );
+  }, [conversations, search]);
 
   // CREATE NEW CONVERSATION
 
@@ -26,16 +45,24 @@ export default function Sidebar({
 
     const newConversation: Conversation = {
       id: Date.now(),
-      name: contactName,
+      name: contactName.trim(),
       online: true,
       messages: [],
     };
 
-    setConversations([...conversations, newConversation]);
+    // ADD CHAT
+
+    setConversations((prev) => [...prev, newConversation]);
+
+    // SELECT CHAT
 
     setSelectedConversationId(newConversation.id);
 
+    // RESET INPUT
+
     setContactName("");
+
+    // CLOSE CARD
 
     setShowNewConversation(false);
   };
@@ -48,8 +75,6 @@ export default function Sidebar({
         <h1 className="text-4xl font-bold text-white">Chats</h1>
 
         <div className="flex gap-3">
-          {/* ADD BUTTON */}
-
           <button
             onClick={() => setShowNewConversation(!showNewConversation)}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-3xl text-black"
@@ -64,6 +89,8 @@ export default function Sidebar({
       <input
         type="text"
         placeholder="Search chats or messages"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         className="mb-6 rounded-2xl border border-[#24324D] bg-[#020817] px-5 py-4 text-white outline-none"
       />
 
@@ -88,6 +115,7 @@ export default function Sidebar({
             >
               Cancel
             </button>
+
             <button
               onClick={createConversation}
               className="rounded-2xl bg-white px-6 py-3 text-lg font-semibold text-black"
@@ -101,14 +129,20 @@ export default function Sidebar({
       {/* CONVERSATIONS */}
 
       <div className="space-y-2 overflow-y-auto">
-        {conversations.map((conversation) => (
-          <ConversationItem
-            key={conversation.id}
-            conversation={conversation}
-            active={selectedConversationId === conversation.id}
-            onClick={() => setSelectedConversationId(conversation.id)}
-          />
-        ))}
+        {filteredConversations.length > 0 ? (
+          filteredConversations.map((conversation) => (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+              active={selectedConversationId === conversation.id}
+              onClick={() => setSelectedConversationId(conversation.id)}
+            />
+          ))
+        ) : (
+          <p className="mt-4 text-center text-gray-400">
+            No conversations found
+          </p>
+        )}
       </div>
     </div>
   );
