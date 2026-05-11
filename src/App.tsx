@@ -1,28 +1,25 @@
-import { useMemo, useState } from 'react';
-import Sidebar from './components/Sidebar';
-import ChatHeader from './components/ChatHeader';
-import ChatWindow from './components/ChatWindow';
-import MessageInput from './components/MessageInput';
-import { initialConversations } from './data/conversations';
-import type { Conversation, Message } from './types/chat';
+import { useMemo, useState } from "react";
+import Sidebar from "./components/Sidebar";
+import ChatHeader from "./components/ChatHeader";
+import ChatWindow from "./components/ChatWindow";
+import MessageInput from "./components/MessageInput";
+import { initialConversations } from "./data/conversations";
+import type { Conversation, Message } from "./types/chat";
 
 export default function App() {
-  const [conversations, setConversations] = useState<Conversation[]>(
-    initialConversations
-  );
+  const [conversations, setConversations] =
+    useState<Conversation[]>(initialConversations);
 
-  const [selectedConversationId, setSelectedConversationId] =
-    useState(1);
+  const [selectedConversationId, setSelectedConversationId] = useState(1);
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const selectedConversation = useMemo(
     () =>
       conversations.find(
-        (conversation) =>
-          conversation.id === selectedConversationId
+        (conversation) => conversation.id === selectedConversationId,
       )!,
-    [conversations, selectedConversationId]
+    [conversations, selectedConversationId],
   );
 
   const sendMessage = () => {
@@ -31,12 +28,12 @@ export default function App() {
     const newMessage: Message = {
       id: Date.now(),
       text: message,
-      sender: 'You',
+      sender: "You",
       timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
+        hour: "2-digit",
+        minute: "2-digit",
       }),
-      status: 'Sent',
+      status: "Sent",
     };
 
     setConversations((prev) =>
@@ -49,16 +46,17 @@ export default function App() {
         }
 
         return conversation;
-      })
+      }),
     );
 
-    setMessage('');
+    setMessage("");
   };
 
   return (
     <div className="grid h-screen grid-cols-[420px_1fr] bg-[#020817]">
       <Sidebar
         conversations={conversations}
+        setConversations={setConversations}
         selectedConversationId={selectedConversationId}
         setSelectedConversationId={setSelectedConversationId}
       />
