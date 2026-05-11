@@ -108,8 +108,3 @@ Users can:
 * Select conversations
 * View messages
 * Send messages
-
-### Presence Indicator
-
-Online users are displayed with a green status indicator.
-
